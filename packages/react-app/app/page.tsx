@@ -1,193 +1,141 @@
 "use client";
-
-/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useWeb3 } from "@/contexts/useWeb3";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { MonitorSmartphone, Chrome } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useWeb3 } from '@/contexts/useWeb3';
+import { ChatLayout } from '@/components/chatLayout'; // Import the chatLayout component
 
 export default function Home() {
-    const {
-        address,
-        getUserAddress,
-        sendCUSD,
-        mintMinipayNFT,
-        getNFTs,
-        signTransaction,
-    } = useWeb3();
+  const {
+    address,
+    getUserAddress,
+    sendCUSD,
+    mintMinipayNFT,
+    getNFTs,
+    signTransaction,
+  } = useWeb3();
 
-    const [cUSDLoading, setCUSDLoading] = useState(false);
-    const [nftLoading, setNFTLoading] = useState(false);
-    const [signingLoading, setSigningLoading] = useState(false);
-    const [userOwnedNFTs, setUserOwnedNFTs] = useState<string[]>([]);
-    const [tx, setTx] = useState<any>(undefined);
-    const [amountToSend, setAmountToSend] = useState<string>("0.1");
-    const [messageSigned, setMessageSigned] = useState<boolean>(false); // State to track if a message was signed
+  // All states in one place
+  const [state, setState] = useState({
+    cUSDLoading: false,
+    nftLoading: false,
+    signingLoading: false,
+    userOwnedNFTs: [],
+    tx: undefined,
+    amountToSend: "0.1",
+    messageSigned: false,
+    showInstallTooltip: false
+  });
 
+  // Helper function to update state
+  const updateState = (updates) => {
+    setState(prev => ({ ...prev, ...updates }));
+  };
 
-    useEffect(() => {
-        getUserAddress();
-    }, []);
+  useEffect(() => {
+    getUserAddress();
+  }, []);
 
-    useEffect(() => {
-        const getData = async () => {
-            const tokenURIs = await getNFTs();
-            setUserOwnedNFTs(tokenURIs);
-        };
-        if (address) {
-            getData();
-        }
-    }, [address]);
+  useEffect(() => {
+    const getData = async () => {
+      if (address) {
+        const tokenURIs = await getNFTs();
+        updateState({ userOwnedNFTs: tokenURIs });
+      }
+    };
+    getData();
+  }, [address, getNFTs]);
 
-    async function sendingCUSD() {
-        if (address) {
-            setSigningLoading(true);
-            try {
-                const tx = await sendCUSD(address, amountToSend);
-                setTx(tx);
-            } catch (error) {
-                console.log(error);
-            } finally {
-                setSigningLoading(false);
-            }
-        }
+  // Transaction functions
+  async function handleSendCUSD() {
+    if (!address) return;
+    updateState({ signingLoading: true });
+    try {
+      const tx = await sendCUSD(address, state.amountToSend);
+      updateState({ tx });
+    } catch (error) {
+      console.error('Error sending cUSD:', error);
+    } finally {
+      updateState({ signingLoading: false });
     }
+  }
 
-    async function signMessage() {
-        setCUSDLoading(true);
-        try {
-            await signTransaction();
-            setMessageSigned(true);
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setCUSDLoading(false);
-        }
+  async function handleSignMessage() {
+    updateState({ cUSDLoading: true });
+    try {
+      await signTransaction();
+      updateState({ messageSigned: true });
+    } catch (error) {
+      console.error('Error signing message:', error);
+    } finally {
+      updateState({ cUSDLoading: false });
     }
+  }
 
-
-    async function mintNFT() {
-        setNFTLoading(true);
-        try {
-            const tx = await mintMinipayNFT();
-            const tokenURIs = await getNFTs();
-            setUserOwnedNFTs(tokenURIs);
-            setTx(tx);
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setNFTLoading(false);
-        }
+  async function handleMintNFT() {
+    updateState({ nftLoading: true });
+    try {
+      const tx = await mintMinipayNFT();
+      const tokenURIs = await getNFTs();
+      updateState({ tx, userOwnedNFTs: tokenURIs });
+    } catch (error) {
+      console.error('Error minting NFT:', error);
+    } finally {
+      updateState({ nftLoading: false });
     }
+  }
 
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <header className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">AkiliAI</h1>
+          <p className="text-xl text-gray-600">AI Utilities and Personal Payment Assistant on Celo Mini Pay</p>
+        </header>
 
-
-    return (
-        <div className="flex flex-col justify-center items-center">
-            {!address && (
-                <div className="h1">Please install Metamask and connect.</div>
-            )}
-            {address && (
-                <div className="h1">
-                    There you go... a canvas for your next Minipay project!
+        {address ? (
+          // If address exists, load the Chat Layout component
+          <ChatLayout />
+        ) : (
+          // Otherwise, display the current page with transaction actions
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-2xl">Get Started with AkiliAI</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button
+                  className="flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300"
+                  onClick={() => console.log("Installing desktop app...")}
+                  onMouseEnter={() => updateState({ showInstallTooltip: true })}
+                  onMouseLeave={() => updateState({ showInstallTooltip: false })}
+                  title="Install on Desktop"
+                >
+                  <MonitorSmartphone className="w-5 h-5" />
+                </Button>
+                <Button
+                  className="flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300"
+                  onClick={() => console.log("Installing browser extension...")}
+                  title="Install Extension"
+                >
+                  <Chrome className="w-5 h-5" />
+                </Button>
+                <div className="relative">
+                  {state.showInstallTooltip && (
+                    <div className="absolute top-full mt-2 p-2 bg-black text-white text-sm rounded shadow-lg">
+                      MiniPay is the runtime environment required for AkiliAI
+                    </div>
+                  )}
                 </div>
-            )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-            <a
-                href="https://faucet.celo.org/alfajores"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 mb-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-                Get Test Tokens
-            </a>
-
-            {address && (
-                <>
-                    <div className="h2 text-center">
-                        Your address:{" "}
-                        <span className="font-bold text-sm">{address}</span>
-                    </div>
-                    {tx && (
-                        <p className="font-bold mt-4">
-                            Tx Completed:{" "}
-                            <a
-                                href={`https://alfajores.celoscan.io/tx/${tx.transactionHash}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 underline"
-                            >
-                                {tx.transactionHash.substring(0, 6)}...{tx.transactionHash.substring(tx.transactionHash.length - 6)}
-                            </a>
-                        </p>
-                    )}
-                    <div className="w-full px-3 mt-7">
-                        <Input
-                            type="number"
-                            value={amountToSend}
-                            onChange={(e) => setAmountToSend(e.target.value)}
-                            placeholder="Enter amount to send"
-                            className="border rounded-md px-3 py-2 w-full mb-3"
-                        ></Input>
-                        <Button
-                            loading={signingLoading}
-                            onClick={sendingCUSD}
-                            title={`Send ${amountToSend} cUSD to your own address`}
-                            widthFull
-                        />
-                    </div>
-
-                    <div className="w-full px-3 mt-6">
-                        <Button
-                            loading={cUSDLoading}
-                            onClick={signMessage}
-                            title="Sign a Message"
-                            widthFull
-                        />
-                    </div>
-
-                    {messageSigned && (
-                        <div className="mt-5 text-green-600 font-bold">
-                            Message signed successfully!
-                        </div>
-                    )}
-
-                    <div className="w-full px-3 mt-5">
-                        <Button
-                            loading={nftLoading}
-                            onClick={mintNFT}
-                            title="Mint Minipay NFT"
-                            widthFull
-                        />
-                    </div>
-
-                    {userOwnedNFTs.length > 0 ? (
-                        <div className="flex flex-col items-center justify-center w-full mt-7">
-                            <p className="font-bold">My NFTs</p>
-                            <div className="w-full grid grid-cols-2 gap-3 mt-3 px-2">
-                                {userOwnedNFTs.map((tokenURI, index) => (
-                                    <div
-                                        key={index}
-                                        className="p-2 border-[3px] border-colors-secondary rounded-xl"
-                                    >
-                                        <Image
-                                            alt="MINIPAY NFT"
-                                            src={tokenURI}
-                                            className="w-[160px] h-[200px] object-cover"
-                                            width={160}
-                                            height={200}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="mt-5">You do not have any NFTs yet</div>
-                    )}
-
-                </>
-            )}
-        </div>
-    );
+      </div>
+    </div>
+  );
 }
