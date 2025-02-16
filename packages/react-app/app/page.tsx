@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { MonitorSmartphone, Chrome } from "lucide-react";
+import { MonitorSmartphone, Chrome, Mic } from "lucide-react";
 import Image from "next/image";
 import { useWeb3 } from '@/contexts/useWeb3';
-import { ChatLayout } from '@/components/chatLayout'; // Import the chatLayout component
+import { ChatLayout } from '@/components/chatLayout';
+import { motion } from "framer-motion";
 
 export default function Home() {
   const {
@@ -18,7 +19,6 @@ export default function Home() {
     signTransaction,
   } = useWeb3();
 
-  // All states in one place
   const [state, setState] = useState({
     cUSDLoading: false,
     nftLoading: false,
@@ -27,10 +27,10 @@ export default function Home() {
     tx: undefined,
     amountToSend: "0.1",
     messageSigned: false,
-    showInstallTooltip: false
+    showInstallTooltip: false,
+    isVoiceInput: false,
   });
 
-  // Helper function to update state
   const updateState = (updates) => {
     setState(prev => ({ ...prev, ...updates }));
   };
@@ -49,7 +49,6 @@ export default function Home() {
     getData();
   }, [address, getNFTs]);
 
-  // Transaction functions
   async function handleSendCUSD() {
     if (!address) return;
     updateState({ signingLoading: true });
@@ -97,10 +96,8 @@ export default function Home() {
         </header>
 
         {address ? (
-          // If address exists, load the Chat Layout component
-          <ChatLayout />
+          <ChatLayout isVoiceInput={state.isVoiceInput} toggleVoiceInput={() => updateState({ isVoiceInput: !state.isVoiceInput })} />
         ) : (
-          // Otherwise, display the current page with transaction actions
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="text-2xl">Get Started with AkiliAI</CardTitle>
@@ -134,7 +131,6 @@ export default function Home() {
             </CardContent>
           </Card>
         )}
-
       </div>
     </div>
   );
