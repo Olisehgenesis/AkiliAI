@@ -91,8 +91,8 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">AkiliAI</h1>
-          <p className="text-xl text-gray-600">AI Utilities and Personal Payment Assistant on Celo Mini Pay</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">AkiliAI </h1>
+          <p className="text-xl text-gray-600">Your Personalised Onchain AI Helper</p>
         </header>
 
         {address ? (
@@ -100,7 +100,7 @@ export default function Home() {
         ) : (
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle className="text-2xl">Get Started with AkiliAI</CardTitle>
+              <CardTitle className="text-2xl">Get Started with AkiliAI AI</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
