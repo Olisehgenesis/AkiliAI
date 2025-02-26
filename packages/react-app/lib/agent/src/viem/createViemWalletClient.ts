@@ -9,4 +9,5 @@ export function createViemWalletClient() {
         transport: custom(window.ethereum!)
       });
     return client;
-}
+    }
+

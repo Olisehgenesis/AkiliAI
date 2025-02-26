@@ -35,8 +35,14 @@ export const sendTransactionTool: ToolConfig<SendTransactionArgs> = {
 async function sendTransaction({ to, value, gasPrice }: SendTransactionArgs) {
     try {
         const walletClient = createViemWalletClient();
+
+        if (!walletClient.account) {
+            throw new Error('Wallet account not connected');
+        }
+        let [address] = await walletClient.getAddresses();
+
         const hash = await walletClient.sendTransaction({
-            account: walletClient.account!,
+            account: address,
             to,
             value: value ? parseEther(value) : undefined,
             gasPrice: gasPrice ? parseEther(gasPrice) : undefined
