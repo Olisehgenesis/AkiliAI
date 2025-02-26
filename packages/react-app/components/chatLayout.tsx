@@ -3,12 +3,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useChat } from "../utils/useChat";
+import { useChat } from "../utils/useChat"; // Import the updated useChat
 import { motion } from "framer-motion";
 import { Mic } from "lucide-react";
 
-export const ChatLayout = ({ isVoiceInput, toggleVoiceInput }) => {
-  const { messages, sendMessage, loading } = useChat();
+// Assume userAddress is passed as a prop or obtained dynamically
+export const ChatLayout = ({ userAddress, isVoiceInput, toggleVoiceInput }) => {
+  const { messages, sendMessage, loading } = useChat(userAddress);
   const [input, setInput] = useState("");
 
   const handleSend = () => {
@@ -20,9 +21,7 @@ export const ChatLayout = ({ isVoiceInput, toggleVoiceInput }) => {
 
   return (
     <Card className="max-w-2xl mx-auto shadow-2xl p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
-      <CardHeader>
-        <CardTitle className="text-xl font-extrabold text-center tracking-wide">SALA AI Assistant</CardTitle>
-      </CardHeader>
+
       <CardContent>
         <ScrollArea className="h-80 border rounded p-3 bg-black bg-opacity-20 backdrop-blur-lg overflow-y-auto">
           {messages.map((msg, index) => (

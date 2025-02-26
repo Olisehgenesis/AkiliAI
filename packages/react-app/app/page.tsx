@@ -1,102 +1,55 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { MonitorSmartphone, Chrome, Mic } from "lucide-react";
-import Image from "next/image";
-import { useWeb3 } from '@/contexts/useWeb3';
+import { MonitorSmartphone, Chrome } from "lucide-react";
+import { createPublicClient, http } from "viem";
+import { celoAlfajores } from "viem/chains";
 import { ChatLayout } from '@/components/chatLayout';
-import { motion } from "framer-motion";
+import { createWalletClient, custom } from 'viem'
+import { mainnet } from 'viem/chains'
+ 
+const client = createWalletClient({
+  chain: celoAlfajores,
+  transport: custom(window.ethereum!)
+})
+
+// Create public client for blockchain interaction (Celo network in this case)
+const publicClient = createPublicClient({
+  chain: celoAlfajores,
+  transport: http(),
+});
 
 export default function Home() {
-  const {
-    address,
-    getUserAddress,
-    sendCUSD,
-    mintMinipayNFT,
-    getNFTs,
-    signTransaction,
-  } = useWeb3();
+  const [address, setAddress] = useState<string | null>(null);
+  const [isVoiceInput, setIsVoiceInput] = useState(false);
+  const [showInstallTooltip, setShowInstallTooltip] = useState(false);
 
-  const [state, setState] = useState({
-    cUSDLoading: false,
-    nftLoading: false,
-    signingLoading: false,
-    userOwnedNFTs: [],
-    tx: undefined,
-    amountToSend: "0.1",
-    messageSigned: false,
-    showInstallTooltip: false,
-    isVoiceInput: false,
-  });
-
-  const updateState = (updates) => {
-    setState(prev => ({ ...prev, ...updates }));
-  };
-
+  // Fetch address using publicClient from viem
   useEffect(() => {
-    getUserAddress();
-  }, []);
-
-  useEffect(() => {
-    const getData = async () => {
-      if (address) {
-        const tokenURIs = await getNFTs();
-        updateState({ userOwnedNFTs: tokenURIs });
+    const fetchAddress = async () => {
+      try {
+        const addresses = await client.getAddresses();
+        const account = addresses[0];
+        setAddress(account); // Set the address once fetched
+      } catch (error) {
+        console.error("Error fetching address:", error);
       }
     };
-    getData();
-  }, [address, getNFTs]);
 
-  async function handleSendCUSD() {
-    if (!address) return;
-    updateState({ signingLoading: true });
-    try {
-      const tx = await sendCUSD(address, state.amountToSend);
-      updateState({ tx });
-    } catch (error) {
-      console.error('Error sending cUSD:', error);
-    } finally {
-      updateState({ signingLoading: false });
-    }
-  }
-
-  async function handleSignMessage() {
-    updateState({ cUSDLoading: true });
-    try {
-      await signTransaction();
-      updateState({ messageSigned: true });
-    } catch (error) {
-      console.error('Error signing message:', error);
-    } finally {
-      updateState({ cUSDLoading: false });
-    }
-  }
-
-  async function handleMintNFT() {
-    updateState({ nftLoading: true });
-    try {
-      const tx = await mintMinipayNFT();
-      const tokenURIs = await getNFTs();
-      updateState({ tx, userOwnedNFTs: tokenURIs });
-    } catch (error) {
-      console.error('Error minting NFT:', error);
-    } finally {
-      updateState({ nftLoading: false });
-    }
-  }
+    fetchAddress();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">AkiliAI </h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">AkiliAI</h1>
           <p className="text-xl text-gray-600">Your Personalised Onchain AI Helper</p>
         </header>
 
         {address ? (
-          <ChatLayout isVoiceInput={state.isVoiceInput} toggleVoiceInput={() => updateState({ isVoiceInput: !state.isVoiceInput })} />
+          <ChatLayout isVoiceInput={isVoiceInput} toggleVoiceInput={() => setIsVoiceInput(!isVoiceInput)} />
         ) : (
           <Card className="mb-8">
             <CardHeader>
@@ -107,8 +60,8 @@ export default function Home() {
                 <Button
                   className="flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300"
                   onClick={() => console.log("Installing desktop app...")}
-                  onMouseEnter={() => updateState({ showInstallTooltip: true })}
-                  onMouseLeave={() => updateState({ showInstallTooltip: false })}
+                  onMouseEnter={() => setShowInstallTooltip(true)}
+                  onMouseLeave={() => setShowInstallTooltip(false)}
                   title="Install on Desktop"
                 >
                   <MonitorSmartphone className="w-5 h-5" />
@@ -120,13 +73,11 @@ export default function Home() {
                 >
                   <Chrome className="w-5 h-5" />
                 </Button>
-                <div className="relative">
-                  {state.showInstallTooltip && (
-                    <div className="absolute top-full mt-2 p-2 bg-black text-white text-sm rounded shadow-lg">
-                      MiniPay is the runtime environment required for AkiliAI
-                    </div>
-                  )}
-                </div>
+                {showInstallTooltip && (
+                  <div className="absolute top-full mt-2 p-2 bg-black text-white text-sm rounded shadow-lg">
+                    MiniPay is the runtime environment required for AkiliAI
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

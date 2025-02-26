@@ -1,30 +1,33 @@
-// utils/useChat.ts
-import { useState } from "react";
-import { Nebula } from "thirdweb/ai";
-import { createThirdwebClient } from "thirdweb";
+import { useState, useEffect } from "react";
+import { receiveMessage } from "../lib/agent/src/entry";
 
-const client = createThirdwebClient({
-    secretKey: process.env.NEXT_PUBLIC_THIRDWEB_SECRET_KEY || "",
-});
-
-export const useChat = () => {
-  const [messages, setMessages] = useState([]);
+export const useChat = (walletAddress: string) => {
+  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [loading, setLoading] = useState(false);
+  const [threadId, setThreadId] = useState<string | null>(null);
 
-  const sendMessage = async (message) => {
+  // Fetch the thread ID for the user, or create one if none exists
+  useEffect(() => {
+    if (walletAddress) {
+      setThreadId(walletAddress); // Assume threadId is wallet address for simplicity
+    }
+  }, [walletAddress]);
+
+  const sendMessage = async (message: string) => {
     setLoading(true);
     setMessages((prev) => [...prev, { role: "user", content: message }]);
 
     try {
-      const response = await Nebula.chat({
-        client: client,
-        message: message,
-         });
+      // Get assistant response
+      const response = await receiveMessage(message);
 
-      setMessages((prev) => [...prev, { role: "assistant", content: response.message }]);
+      if (response) {
+        setMessages((prev) => [...prev, { role: "assistant", content: response }]);
+      }
     } catch (error) {
-      console.error("Chat error:", error);
+      console.error("Error handling message:", error);
     }
+
     setLoading(false);
   };
 
