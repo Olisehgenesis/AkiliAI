@@ -23,6 +23,11 @@
 </p>
 
 ## About The Project
+![image](https://github.com/user-attachments/assets/837e26f0-bb2c-41fc-b48e-0250be8cfb16)
+
+![image](https://github.com/user-attachments/assets/3fa09e41-a754-4e0d-a876-0a48577478da)
+
+
 
 AkiliAI is an AI-powered utility and personal payment assistant built on Celo MiniPay. It seamlessly integrates smart contract capabilities with AI to provide a frictionless user experience for financial transactions and blockchain interactions. With AkiliAI, users can send payments, sign transactions, and interact with blockchain-based assets in an intuitive and efficient way.
 
