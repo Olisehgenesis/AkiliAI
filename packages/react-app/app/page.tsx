@@ -6,13 +6,13 @@ import { MonitorSmartphone, Chrome } from "lucide-react";
 import { createPublicClient, http } from "viem";
 import { celoAlfajores } from "viem/chains";
 import { ChatLayout } from '@/components/chatLayout';
-import { createWalletClient, custom } from 'viem'
-import { mainnet } from 'viem/chains'
- 
+import { createWalletClient, custom } from 'viem';
+import { mainnet } from 'viem/chains';
+
 const client = createWalletClient({
   chain: celoAlfajores,
   transport: custom(window.ethereum!)
-})
+});
 
 // Create public client for blockchain interaction (Celo network in this case)
 const publicClient = createPublicClient({
@@ -41,22 +41,22 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">AkiliAI</h1>
-          <p className="text-xl text-gray-600">Your Personalised Onchain AI Helper</p>
+    <div className="min-h-[100vh] bg-gradient-to-b from-gray-50 to-gray-100 overflow-x-hidden">
+      <div className="w-full max-w-lg mx-auto px-4 py-6 sm:max-w-4xl">
+        <header className="text-center mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">AkiliAI</h1>
+          <p className="text-lg sm:text-xl text-gray-600">Your Personalized On-chain AI Helper</p>
         </header>
 
         {address ? (
-          <ChatLayout isVoiceInput={isVoiceInput} toggleVoiceInput={() => setIsVoiceInput(!isVoiceInput)} />
+          <ChatLayout isVoiceInput={isVoiceInput} toggleVoiceInput={() => setIsVoiceInput(!isVoiceInput)} userAddress={address} />
         ) : (
-          <Card className="mb-8">
+          <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="text-2xl">Get Started with AkiliAI AI</CardTitle>
+              <CardTitle className="text-xl sm:text-2xl">Get Started with AkiliAI</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex flex-wrap justify-center gap-4">
                 <Button
                   className="flex items-center justify-center gap-2 hover:scale-105 transition-transform duration-300"
                   onClick={() => console.log("Installing desktop app...")}

@@ -7,7 +7,6 @@ import { useChat } from "../utils/useChat"; // Import the updated useChat
 import { motion } from "framer-motion";
 import { Mic } from "lucide-react";
 
-// Assume userAddress is passed as a prop or obtained dynamically
 export const ChatLayout = ({ userAddress, isVoiceInput, toggleVoiceInput }) => {
   const { messages, sendMessage, loading } = useChat(userAddress);
   const [input, setInput] = useState("");
@@ -20,10 +19,9 @@ export const ChatLayout = ({ userAddress, isVoiceInput, toggleVoiceInput }) => {
   };
 
   return (
-    <Card className="max-w-2xl mx-auto shadow-2xl p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
-
+    <Card className="w-full max-w-2xl mx-auto shadow-2xl p-4 sm:p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
       <CardContent>
-        <ScrollArea className="h-80 border rounded p-3 bg-black bg-opacity-20 backdrop-blur-lg overflow-y-auto">
+        <ScrollArea className="h-80 sm:h-96 border rounded p-3 bg-black bg-opacity-20 backdrop-blur-lg overflow-y-auto">
           {messages.map((msg, index) => (
             <motion.div
               key={index}
@@ -41,7 +39,8 @@ export const ChatLayout = ({ userAddress, isVoiceInput, toggleVoiceInput }) => {
           ))}
           {loading && <p className="text-lg text-center text-blue-300 animate-pulse">🤖 Processing request...</p>}
         </ScrollArea>
-        <div className="flex items-center mt-4 space-x-3">
+        
+        <div className="flex flex-col sm:flex-row items-center mt-4 space-y-3 sm:space-y-0 sm:space-x-3">
           {isVoiceInput ? (
             <motion.div
               className="flex-grow flex items-center justify-center"
